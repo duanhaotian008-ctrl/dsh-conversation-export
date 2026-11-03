@@ -1,0 +1,6 @@
+{
+  "meta": {
+    "title": "Conversation Export",
+    "description": "Export a conversation as JSON or Markdown from its sidebar menu, with optional tool records. Attachments remain references; nothing is uploaded."
+  }
+}

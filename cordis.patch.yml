@@ -1,0 +1,5 @@
+- insert:
+    - id: local-conversation-export
+      name: '@local/dsh-conversation-export'
+      config:
+        maxExportBytes: 67108864
