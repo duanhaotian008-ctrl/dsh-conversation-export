@@ -258,7 +258,11 @@ export function createExportTool(service, spillStore) {
         const saved = await spillStore.saveText({
           owner: { sessionId: caller.id },
           source: { kind: 'tool', toolName: TOOL_NAME, callId: exec.callId, label: 'Conversation export' },
-          suggestedName: result.filename,
+          // Spill-local escapes each non-ASCII UTF-16 unit as ~XXXX. A
+          // friendly CJK/emoji title can exceed filesystem component limits
+          // after that expansion. The store supplies uniqueness; keep only a
+          // short ASCII storage name and return the friendly filename below.
+          suggestedName: `conversation.${options.format === 'json' ? 'json' : 'md'}`,
           content: result.content,
         });
         exec.signal.throwIfAborted();

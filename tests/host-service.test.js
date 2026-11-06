@@ -258,6 +258,31 @@ test('tool uses same serializer, saves complete private artifact and returns bou
   assert.deepEqual(JSON.parse(rendered[0].text), value);
 });
 
+test('tool storage names stay short after DSH spill encoding while preserving the friendly filename', async () => {
+  for (const format of ['json', 'markdown']) {
+    for (const title of ['中'.repeat(40), '🧪'.repeat(30)]) {
+      const obs = observation('session-12345678-1234-1234-1234-123456789abc');
+      obs.events[0].data.title = title;
+      const env = setup(obs);
+      const tool = createExportTool(env.service, { async saveText(input) {
+        // dsh-spill-local 0.2.2-rc.1 encodes each non-ASCII UTF-16 code unit
+        // as ~XXXX, then prepends 12 hex characters and a hyphen.
+        const encoded = input.suggestedName.split('').map(ch => /^[A-Za-z0-9._-]$/.test(ch)
+          ? ch : '~' + ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')).join('');
+        assert.ok(encoded.length + 13 <= 255, 'encoded basename must fit a filesystem component');
+        assert.equal(input.suggestedName, `conversation.${format === 'json' ? 'json' : 'md'}`);
+        return { locator: 'fixture://private/' + encoded, bytes: Buffer.byteLength(input.content), retrievalHint: 'Fixture.' };
+      } });
+      const result = await tool.execute({ format }, execution({
+        agent: { session: { id: obs.header.id, header: obs.header } },
+      }));
+      assert.equal(result.filename, createExport(obs, { ...options, sessionId: obs.header.id, format }, { now: NOW }).filename);
+      assert.ok(result.filename.startsWith(title));
+      assert.equal(obs.disposed, 1);
+    }
+  }
+});
+
 test('tool missing caller, malformed args or injected authority never save an artifact', async () => {
   const env = setup();
   let saves = 0;

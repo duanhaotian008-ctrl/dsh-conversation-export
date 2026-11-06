@@ -27,7 +27,13 @@
 
 ## 安装与兼容
 
-首版兼容基线：**DSH 0.2.1-rc.5**。包名：`@local/dsh-conversation-export`。
+当前插件版本：**1.0.1**。支持 **DSH 0.2.2-rc.1**，保留 **0.2.1-rc.5** 支持。包名：`@local/dsh-conversation-export`。
+
+1.0.0 的兼容声明精确限定了 `0.2.1-rc.5`，因此升级 DSH 后会显示“不兼容”。1.0.1 在核对新版 Host 接口及保留的侧边栏菜单 Slot 后，明确加入 `0.2.2-rc.1`；不使用版本豁免，也不放行尚未验证的其他版本。
+
+GitHub 仓库：https://github.com/duanhaotian008-ctrl/dsh-conversation-export
+
+可在插件管理器中用 `github:duanhaotian008-ctrl/dsh-conversation-export#main` 安装仓库最新版本。已经从本地目录链接安装的用户，更新目录后再通过插件管理器安装同一路径；如果提示 `already-installed`，先在插件管理器卸载该插件再安装。若返回 `restart-required`，必须重启 DSH，仅刷新页面不足以应用 Host 更新。
 
 通过 Harness 插件管理器安装这个目录的绝对路径，或发布／打包后的 bundle。安装会影响当前 profile 下的全部会话，可在“插件”页面禁用或卸载。
 
@@ -106,9 +112,11 @@ UI 与工具使用同一序列化实现。UI 导出不写入会话日志、不�
 ```powershell
 node --check index.js
 node --check client.js
-node --test tests/export-core.test.js tests/host-service.test.js
+node --test tests/*.test.js
 ```
 
-测试覆盖快照读取与释放、正文/工具/问答、压缩与分支、Unicode、附件元数据、文件名、大小限制、授权、HTTP 参数与错误、取消、工具与 UI 序列化一致性以及 Host 注册清理。单元测试中的宿主接口是受控测试替身，不等同于真实 GUI 下载验收。
+69 项测试覆盖快照读取与释放、正文/工具/问答、压缩与分支、Unicode、附件元数据、文件名、大小限制、授权、HTTP 参数与错误、取消、工具与 UI 序列化一致性以及 Host 注册清理；还直接加载分发的 Client 模块，检查菜单目标、下载请求、切换会话、取消、错误和卸载，以及包入口和兼容声明。
+
+测试中的宿主、React 和浏览器接口是受控替身，不等同于真实 GUI 点击和下载落盘验收。更新时应另行检查插件管理器应用结果，并刷新当前 GUI 验证菜单与导出。
 
 代码与原创 SVG 图标按 MIT 许可分发。
