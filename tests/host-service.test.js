@@ -330,7 +330,8 @@ test('apply registers exactly owned service/route/tool; disposal removes resourc
   assert.equal(installed.get('route').requestBody, 'buffered');
   assert.equal(installed.get('tool').name, 'export_conversation');
   const retained = installed.get('conversationExport');
-  for (const dispose of disposers.reverse()) await dispose();
+  // Cordis unloads independent effects concurrently, not sequentially.
+  await Promise.all(disposers.map(dispose => dispose()));
   assert.equal(installed.size, 0);
   await assert.rejects(retained.exportConversation(options, owner), { name: 'AbortError' });
 });

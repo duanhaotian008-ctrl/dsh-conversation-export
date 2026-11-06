@@ -37,6 +37,7 @@ export function apply(ctx, config) {
     toolCtx.effect(() => toolCtx.tools.register(createExportTool(service, toolCtx.spillStore)),
       'conversation-export: agent tool');
   });
-  // Registered last: abort and drain reads before removing the route/service.
+  // Abort and drain owned reads on unload. Cordis may dispose sibling
+  // effects concurrently, so route/service removal need not wait for draining.
   ctx.effect(() => () => service.dispose(), 'conversation-export: in-flight reads');
 }
